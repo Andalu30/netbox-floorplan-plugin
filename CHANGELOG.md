@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix editor and viewer JavaScript when NetBox is served under a BASE_PATH subfolder.
+
 ## v0.10.0
 
 **Targets NetBox 4.7.** The supported range is declared as a minimum of 4.7.0 and a
