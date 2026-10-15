@@ -208,6 +208,10 @@ function move_pan(opt, canvas) {
 
 
 
+// NetBox's BASE_PATH with no trailing slash ("" when NetBox is served at the root), published
+// by the floorplan templates. Prefix every URL the editor and viewer build with it.
+export const BASE_PATH = (typeof window !== "undefined" && window.NETBOX_BASE_PATH) || "";
+
 // NetBox's MEDIA_URL, published by the floorplan templates from Django settings. The literal
 // is only a fallback for a page that did not set it.
 const MEDIA_URL = (typeof window !== "undefined" && window.NETBOX_MEDIA_URL) || "/media/";
@@ -321,7 +325,7 @@ function init_floor_plan(floorplan_id, canvas, mode) {
     }
 
     var target_image = 0;
-    const floorplan_call = $.get(`/api/plugins/floorplan/floorplans/?id=${floorplan_id}`);
+    const floorplan_call = $.get(`${BASE_PATH}/api/plugins/floorplan/floorplans/?id=${floorplan_id}`);
     floorplan_call.done(function (floorplan) {
         floorplan.results.forEach((floorplan) => {
             target_image = floorplan.assigned_image

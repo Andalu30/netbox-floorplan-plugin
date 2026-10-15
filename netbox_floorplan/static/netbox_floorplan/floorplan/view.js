@@ -6,8 +6,9 @@ import {
     move_pan,
     start_pan,
     reset_zoom,
-    init_floor_plan
-} from "/static/netbox_floorplan/floorplan/utils.js";
+    init_floor_plan,
+    BASE_PATH
+} from "./utils.js";
 
 var canvas = new fabric.Canvas('canvas');
 
@@ -23,7 +24,7 @@ canvas.on('mouse:over', function (options) {
 canvas.on('mouse:down', function (options) {
     if (options.target) {
         if (options.target.hasOwnProperty("custom_meta")) {
-            window.location.href = options.target.custom_meta.object_url;
+            window.location.href = BASE_PATH + options.target.custom_meta.object_url;
         }
     }
 });

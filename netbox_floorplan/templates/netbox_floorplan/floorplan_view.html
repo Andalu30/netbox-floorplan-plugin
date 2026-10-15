@@ -29,6 +29,8 @@
     <script>
       // MEDIA_URL from NetBox settings, so the canvas does not have to assume /media/.
       window.NETBOX_MEDIA_URL = "{{ MEDIA_URL|escapejs }}";
+      // NetBox's BASE_PATH, so the canvas does not have to assume it is served at the root.
+      window.NETBOX_BASE_PATH = "{% url 'home' %}".replace(/\/$/, "");
     </script>
     <script type="module" src="{% static 'netbox_floorplan/floorplan/view.js' %}"></script>
 {% endblock javascript %}

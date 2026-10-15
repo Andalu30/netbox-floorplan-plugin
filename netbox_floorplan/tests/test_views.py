@@ -1,9 +1,10 @@
-from django.urls import reverse
+from django.urls import reverse, set_script_prefix
 from utilities.testing import TestCase, ViewTestCases
 
-from dcim.models import Location, Site
+from dcim.models import Device, Location, Rack, Site
 
 from netbox_floorplan.models import Floorplan, FloorplanImage
+from netbox_floorplan.tables import FloorplanDeviceTable, FloorplanRackTable
 
 
 def plugin_base_url(model):
@@ -257,6 +258,70 @@ class MediaUrlExposureTestCase(TestCase):
         response = self.client.get(reverse('dcim:site_floorplans', args=[self.site.pk]))
         self.assertHttpStatus(response, 200)
         self.assertIn(f'window.NETBOX_MEDIA_URL = "{settings.MEDIA_URL}"', response.content.decode())
+
+
+class BasePathTestCase(TestCase):
+    """
+    NetBox can be served under a subfolder (BASE_PATH). The templates publish it for the
+    JavaScript, and every URL the plugin builds must carry it rather than assume the root.
+
+    Setting the script prefix makes reverse() and {% url %} apply it exactly as they do when a
+    WSGI server reports NetBox mounted under a subfolder. URLs are reversed before it is set,
+    because the test client routes on the unprefixed path.
+    """
+    user_permissions = ()
+
+    PREFIX = '/netbox'
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.site = Site.objects.create(name='Site 1', slug='site-1')
+        cls.floorplan = Floorplan.objects.create(site=cls.site)
+
+    def setUp(self):
+        super().setUp()
+        # The prefix is thread-local and survives the request; do not leak it into other tests.
+        self.addCleanup(set_script_prefix, '/')
+
+    def test_editor_publishes_base_path(self):
+        self.add_permissions('netbox_floorplan.change_floorplan')
+        url = reverse('plugins:netbox_floorplan:floorplan_edit', args=[self.floorplan.pk])
+        set_script_prefix(f'{self.PREFIX}/')
+        response = self.client.get(url)
+        self.assertHttpStatus(response, 200)
+        self.assertIn(f'window.NETBOX_BASE_PATH = "{self.PREFIX}/"', response.content.decode())
+
+    def test_base_path_is_published_before_the_module_script(self):
+        # The module reads the global at import time, so ordering matters.
+        self.add_permissions('netbox_floorplan.change_floorplan')
+        response = self.client.get(
+            reverse('plugins:netbox_floorplan:floorplan_edit', args=[self.floorplan.pk])
+        )
+        content = response.content.decode()
+        self.assertLess(
+            content.index('window.NETBOX_BASE_PATH'),
+            content.index('floorplan/edit.js'),
+        )
+
+    def test_site_tab_publishes_base_path(self):
+        self.add_permissions('dcim.view_site', 'netbox_floorplan.view_floorplan')
+        url = reverse('dcim:site_floorplans', args=[self.site.pk])
+        set_script_prefix(f'{self.PREFIX}/')
+        response = self.client.get(url)
+        self.assertHttpStatus(response, 200)
+        self.assertIn(f'window.NETBOX_BASE_PATH = "{self.PREFIX}/"', response.content.decode())
+
+    def test_picker_htmx_urls_carry_base_path(self):
+        # The embedded picker tables page, sort and reconfigure themselves through htmx_url.
+        set_script_prefix(f'{self.PREFIX}/')
+        self.assertEqual(
+            FloorplanRackTable(Rack.objects.none()).htmx_url,
+            f'{self.PREFIX}/plugins/floorplan/floorplans/racks/',
+        )
+        self.assertEqual(
+            FloorplanDeviceTable(Device.objects.none()).htmx_url,
+            f'{self.PREFIX}/plugins/floorplan/floorplans/devices/',
+        )
 
 
 class DevicePickerImageUrlTestCase(TestCase):

@@ -13,8 +13,9 @@ import {
     move_pan,
     reset_zoom,
     init_floor_plan,
-    floorplan_image_url
-} from "/static/netbox_floorplan/floorplan/utils.js";
+    floorplan_image_url,
+    BASE_PATH
+} from "./utils.js";
 
 
 var csrf = document.getElementById('csrf').value;
@@ -25,8 +26,8 @@ var site_id = document.getElementById('site_id').value;
 var location_id = document.getElementById('location_id').value;
 
 
-htmx.ajax('GET', `/plugins/floorplan/floorplans/racks/?floorplan_id=${obj_pk}`, { source: '#rack-card', target: '#rack-card', swap: 'innerHTML', trigger: 'load' })
-htmx.ajax('GET', `/plugins/floorplan/floorplans/devices/?floorplan_id=${obj_pk}`, { source: '#unrack-card', target: '#unrack-card', swap: 'innerHTML', trigger: 'load' })
+htmx.ajax('GET', `${BASE_PATH}/plugins/floorplan/floorplans/racks/?floorplan_id=${obj_pk}`, { source: '#rack-card', target: '#rack-card', swap: 'innerHTML', trigger: 'load' })
+htmx.ajax('GET', `${BASE_PATH}/plugins/floorplan/floorplans/devices/?floorplan_id=${obj_pk}`, { source: '#unrack-card', target: '#unrack-card', swap: 'innerHTML', trigger: 'load' })
 
 
 fabric.Object.prototype.set({
@@ -459,8 +460,8 @@ function delete_floorplan_object() {
         }
         save_floorplan();
         setTimeout(() => {
-            htmx.ajax('GET', `/plugins/floorplan/floorplans/racks/?floorplan_id=${obj_pk}`, { target: '#rack-card', swap: 'innerHTML' });
-            htmx.ajax('GET', `/plugins/floorplan/floorplans/devices/?floorplan_id=${obj_pk}`, { target: '#unrack-card', swap: 'innerHTML' });
+            htmx.ajax('GET', `${BASE_PATH}/plugins/floorplan/floorplans/racks/?floorplan_id=${obj_pk}`, { target: '#rack-card', swap: 'innerHTML' });
+            htmx.ajax('GET', `${BASE_PATH}/plugins/floorplan/floorplans/devices/?floorplan_id=${obj_pk}`, { target: '#unrack-card', swap: 'innerHTML' });
         }, 1500);
     });
     // Clear the selection after deletion
@@ -997,7 +998,7 @@ function update_background() {
 
     $.ajax({
         type: "PATCH",
-        url: `/api/plugins/floorplan/floorplans/${obj_pk}/`,
+        url: `${BASE_PATH}/api/plugins/floorplan/floorplans/${obj_pk}/`,
         dataType: "json",
         headers: {
             "X-CSRFToken": csrf,
@@ -1088,7 +1089,7 @@ function update_dimensions() {
     var floor_json = canvas.toJSON(["id", "text", "_controlsVisibility", "custom_meta", "lockMovementY", "lockMovementX", "evented", "selectable"]);
     $.ajax({
         type: "PATCH",
-        url: `/api/plugins/floorplan/floorplans/${obj_pk}/`,
+        url: `${BASE_PATH}/api/plugins/floorplan/floorplans/${obj_pk}/`,
         dataType: "json",
         headers: {
             "X-CSRFToken": csrf,
@@ -1260,7 +1261,7 @@ function save_floorplan() {
     var floor_json = canvas.toJSON(["id", "text", "_controlsVisibility", "custom_meta", "lockMovementY", "lockMovementX", "evented", "selectable"]);
     $.ajax({
         type: "PATCH",
-        url: `/api/plugins/floorplan/floorplans/${obj_pk}/`,
+        url: `${BASE_PATH}/api/plugins/floorplan/floorplans/${obj_pk}/`,
         dataType: "json",
         headers: {
             "X-CSRFToken": csrf,
@@ -1279,7 +1280,7 @@ function save_and_redirect() {
     var floor_json = canvas.toJSON(["id", "text", "_controlsVisibility", "custom_meta", "lockMovementY", "lockMovementX", "evented", "selectable"]);
     $.ajax({
         type: "PATCH",
-        url: `/api/plugins/floorplan/floorplans/${obj_pk}/`,
+        url: `${BASE_PATH}/api/plugins/floorplan/floorplans/${obj_pk}/`,
         dataType: "json",
         headers: {
             "X-CSRFToken": csrf,
@@ -1293,9 +1294,9 @@ function save_and_redirect() {
         }
     }).done(function () {
         if (record_type == "site") {
-            window.location.href = `/dcim/sites/${site_id}/floorplans/`;
+            window.location.href = `${BASE_PATH}/dcim/sites/${site_id}/floorplans/`;
         } else {
-            window.location.href = `/dcim/locations/${location_id}/floorplans/`;
+            window.location.href = `${BASE_PATH}/dcim/locations/${location_id}/floorplans/`;
         }
     });
 }

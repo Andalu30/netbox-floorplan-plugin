@@ -1,5 +1,18 @@
 # Change Log
 
+## Unreleased
+
+### Bug Fixes
+
+* **The floorplan editor and viewer now work when NetBox is served under a `BASE_PATH`.**
+  The JavaScript built root-relative URLs (`/api/plugins/...`, `/plugins/...`, `/dcim/...`)
+  and imported its helpers from a hard-coded `/static/...` path, so under a subfolder the
+  canvas failed to load, the rack and device pickers stayed empty, saving failed, and
+  clicking an object led nowhere. The templates now publish NetBox's base path for the
+  scripts to prefix, the helpers are imported relatively, and the pickers' paging and
+  sorting URLs are reversed instead of hard-coded. The `object_url` stored in the canvas
+  stays unprefixed, so existing floorplans keep working and survive a change of base path.
+
 ## v0.10.0
 
 **Targets NetBox 4.7.** The supported range is declared as a minimum of 4.7.0 and a

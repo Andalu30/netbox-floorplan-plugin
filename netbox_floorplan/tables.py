@@ -4,6 +4,8 @@ from netbox.tables import NetBoxTable
 from .models import Floorplan, FloorplanImage
 from functools import cached_property
 
+from django.urls import reverse
+
 from dcim.models import Rack, Device
 
 
@@ -67,7 +69,7 @@ class FloorplanRackTable(NetBoxTable):
     @cached_property
     def htmx_url(self):
         # no need to check for embedded as this table is always embedded
-        return "/plugins/floorplan/floorplans/racks/"
+        return reverse('plugins:netbox_floorplan:floorplan_rack_list')
 
     class Meta(NetBoxTable.Meta):
         model = Rack
@@ -94,7 +96,7 @@ class FloorplanDeviceTable(NetBoxTable):
     @cached_property
     def htmx_url(self):
         # no need to check for embedded as this table is always embedded
-        return "/plugins/floorplan/floorplans/devices/"
+        return reverse('plugins:netbox_floorplan:floorplan_device_list')
 
     class Meta(NetBoxTable.Meta):
         model = Device
